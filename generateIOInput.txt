@@ -1,0 +1,4 @@
+double gyroYawPositionRadians
+double gyroYawVelocityRadiansPerSec
+double gyroPitchPositoinRadians
+double gyroRollPositionRadians
