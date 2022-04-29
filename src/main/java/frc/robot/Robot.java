@@ -4,13 +4,18 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.Constants.SwerveConstants;
+import frc.robot.subsystems.swerve.Drive;
+import frc.robot.subsystems.swerve.DriveIOSdsSparkMaxPigeon2;
+import frc.robot.subsystems.swerve.SwerveModuleIOSparkMaxThriftyEncoder;
+import frc.robot.utility.FieldRelativeSpeed;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.inputs.LoggedNetworkTables;
 import org.littletonrobotics.junction.io.ByteLogReceiver;
-import org.littletonrobotics.junction.io.ByteLogReplay;
 import org.littletonrobotics.junction.io.LogSocketServer;
 
 /**
@@ -22,7 +27,15 @@ import org.littletonrobotics.junction.io.LogSocketServer;
 public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
 
-  private RobotContainer m_robotContainer;
+  XboxController driver = new XboxController(0);
+
+  Drive drive =
+      new Drive(
+          new DriveIOSdsSparkMaxPigeon2(),
+          new SwerveModuleIOSparkMaxThriftyEncoder(SwerveConstants.kFrontLeftModuleConfig),
+          new SwerveModuleIOSparkMaxThriftyEncoder(SwerveConstants.kFrontRightModuleConfig),
+          new SwerveModuleIOSparkMaxThriftyEncoder(SwerveConstants.kBackLeftModuleConfig),
+          new SwerveModuleIOSparkMaxThriftyEncoder(SwerveConstants.kBackRightModuleConfig));
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -43,19 +56,18 @@ public class Robot extends LoggedRobot {
       Logger.getInstance().addDataReceiver(new LogSocketServer(5800));
     } else {
       // Prompt the user for a file path on the command line
-      String path = ByteLogReplay.promptForPath();
+      // String path = ByteLogReplay.promptForPath();
       // Read log file for replay
-      Logger.getInstance().setReplaySource(new ByteLogReplay(path));
+      // Logger.getInstance().setReplaySource(new ByteLogReplay(path));
       // Save replay results to a new log with the "_sim" suffix
-      Logger.getInstance()
-          .addDataReceiver(new ByteLogReceiver(ByteLogReceiver.addPathSuffix(path, "_sim")));
+      // Logger.getInstance()
+      // .addDataReceiver(new ByteLogReceiver(ByteLogReceiver.addPathSuffix(path,
+      // "_sim")));
     }
 
     // Start logging! No more data receivers, replay sources, or metadata values may
     // be added.
     Logger.getInstance().start();
-
-    m_robotContainer = new RobotContainer();
   }
 
   /**
@@ -87,8 +99,6 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
@@ -112,7 +122,13 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    drive.setFieldRelativeSpeeds(
+        new FieldRelativeSpeed(
+            driver.getLeftX() * SwerveConstants.kMaxSpeedMetersPerSecond,
+            driver.getLeftY() * SwerveConstants.kMaxSpeedMetersPerSecond,
+            driver.getRightX() * SwerveConstants.kMaxAngularSpeedRadiansPerSecond));
+  }
 
   @Override
   public void testInit() {

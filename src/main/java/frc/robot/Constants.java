@@ -16,9 +16,16 @@ import frc.robot.subsystems.swerve.SwerveModuleConfig;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static final class CANIDs {
+    public static final int pigeon = 10;
+  }
+
   public static final class SwerveConstants {
     public static final double kDrivingRatio = 6.75;
     public static final double kWheelRadiusMeters = Units.inchesToMeters(2.0);
+    public static final double kMaxSpeedMetersPerSecond = Units.feetToMeters(16);
+
+    public static final double kMaxAngularSpeedRadiansPerSecond = Units.degreesToRadians(360);
 
     public static final SwerveModuleConfig kFrontLeftModuleConfig =
         SwerveModuleConfig.builder()
